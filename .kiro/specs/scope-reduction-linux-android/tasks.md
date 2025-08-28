@@ -1,20 +1,20 @@
 # Implementation Plan - Scope Reduction to Linux and Android
 
-- [-] 1. Prepare for safe removal
+- [x] 1. Prepare for safe removal
   - Create backup branch and validation baseline
   - Set up automated testing pipeline for validation
   - Document current build metrics for comparison
   - _Requirements: 7.1, 8.1_
 
 - [ ] 2. Remove unused applications
-  - [ ] 2.1 Remove Storybook application
+  - [x] 2.1 Remove Storybook application
     - Delete `apps/storybook/` directory completely
     - Remove storybook references from root package.json scripts
     - Update workspace configuration to exclude storybook
     - Validate desktop app still builds and runs
     - _Requirements: 1.1, 1.6, 1.7_
 
-  - [ ] 2.2 Remove landing page application
+  - [x] 2.2 Remove landing page application
     - Delete `apps/landing/` directory completely
     - Remove landing references from root package.json scripts
     - Remove landing-web combined script from package.json
@@ -22,7 +22,7 @@
     - Validate desktop app still builds and runs
     - _Requirements: 1.1, 1.6, 1.7_
 
-  - [ ] 2.3 Remove web application
+  - [x] 2.3 Remove web application
     - Delete `apps/web/` directory completely
     - Remove web references from root package.json scripts
     - Remove dev:web and web-related scripts from package.json

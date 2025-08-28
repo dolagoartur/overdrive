@@ -6,22 +6,22 @@
 		"prep": "pnpm gen:prisma",
 		"postprep": "pnpm codegen",
 		"build": "turbo run build",
-		"landing-web": "turbo run dev --parallel --filter=@sd/landing --filter=@sd/web",
+
 		"gen:migrations": "pnpm prisma migrate dev --schema core/prisma/schema.prisma",
 		"gen:prisma": "pnpm prisma generate --schema core/prisma/schema.prisma",
 		"format": "prettier --write .",
 		"desktop": "pnpm --filter @sd/desktop --",
 		"tauri": "pnpm desktop tauri",
-		"web": "pnpm --filter @sd/web -- ",
+
 		"mobile": "pnpm --filter @sd/mobile --",
 		"core": "pnpm --filter @sd/server -- ",
-		"landing": "pnpm --filter @sd/landing -- ",
+
 		"ui": "pnpm --filter @sd/ui -- ",
 		"interface": "pnpm --filter @sd/interface -- ",
 		"assets": "pnpm --filter @sd/assets -- ",
 		"client": "pnpm --filter @sd/client -- ",
-		"storybook": "pnpm --filter @sd/storybook -- ",
-		"dev:web": "pnpm --filter @sd/web dev:web",
+
+
 		"dev:desktop": "pnpm run --filter @sd/desktop tauri dev",
 		"bootstrap:desktop": "cargo clean && ./scripts/setup.sh && pnpm i && pnpm prep && pnpm tauri dev",
 		"codegen": "cargo test -p sd-core api::tests::test_and_export_rspc_bindings -- --exact",

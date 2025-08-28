@@ -1,0 +1,40 @@
+=== Overdrive Build Metrics Measurement ===
+Timestamp: Thu Aug 28 16:16:02 CEST 2025
+Git commit: b1ebb12dc6094cfb95066d1980e6862dff921569
+Git branch: main
+
+=== Codebase Size ===
+Total repository: 7.5G
+Applications directory: 275M
+Core Rust library: 2.5M
+Shared Rust crates: 3.9M
+Node.js packages: 41M
+Interface components: 39M
+
+=== File Counts ===
+Rust files: 806 files
+TypeScript files: 52973 files
+TypeScript React files: 12986 files
+JavaScript files: 102783 files
+JSON files: 9817 files
+TOML files: 215 files
+
+=== Application Sizes ===
+Desktop app: 46M
+Mobile app (React Native): 37M
+Web app: 23M
+Landing page: 102M
+Server app: 52K
+Storybook: 32M
+
+=== Dependencies ===
+Cargo workspace members: 9
+Root npm devDependencies: 13
+Total package.json files: 5170
+
+=== Build Artifacts ===
+Rust build artifacts: 4.7G
+Node.js dependencies: 2.4G
+Desktop app dist: 20M
+
+=== Measurement Complete ===
