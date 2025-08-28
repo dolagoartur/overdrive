@@ -74,9 +74,6 @@ impl From<Error> for rspc::Error {
 pub enum NonCriticalFileIdentifierError {
 	#[error("failed to extract file metadata: {0}")]
 	FailedToExtractFileMetadata(String),
-	#[cfg(target_os = "windows")]
-	#[error("failed to extract metadata from on-demand file: {0}")]
-	FailedToExtractMetadataFromOnDemandFile(String),
 	#[error(
 		"failed to extract isolated file path data: <file_path_id='{file_path_pub_id}'>: {error}"
 	)]

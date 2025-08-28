@@ -32,21 +32,8 @@ pub struct DiskAccess;
 
 impl DiskAccess {
 	/// This function is a no-op on non-MacOS systems.
-	///
-	/// Once ran, it will open the "Full Disk Access" prompt.
 	#[allow(clippy::missing_const_for_fn)]
 	pub fn request_fda() -> Result<()> {
-		#[cfg(target_os = "macos")]
-		{
-			use crate::error::Error;
-			use std::process::Command;
-
-			Command::new("open")
-				.arg("x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles")
-				.status()
-				.map_err(|_| Error::FDAPromptError)?;
-		}
-
 		Ok(())
 	}
 }

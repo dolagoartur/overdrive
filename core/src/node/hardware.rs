@@ -97,34 +97,6 @@ impl From<&str> for HardwareModel {
 
 impl HardwareModel {
 	pub fn try_get() -> Result<Self, io::Error> {
-		#[cfg(target_os = "macos")]
-		{
-			use std::process::Command;
-
-			let output = Command::new("system_profiler")
-				.arg("SPHardwareDataType")
-				.output()?;
-
-			if output.status.success() {
-				let output_str = std::str::from_utf8(&output.stdout).unwrap_or_default();
-				let hardware_model = output_str
-					.lines()
-					.find(|line| line.to_lowercase().contains("model name"))
-					.and_then(|line| line.split_once(':'))
-					.map(|(_, model_name)| model_name.trim().into())
-					.unwrap_or(Self::Other);
-
-				Ok(hardware_model)
-			} else {
-				Err(io::Error::new(
-					io::ErrorKind::Other,
-					format!(
-						"Failed to get hardware model name: {}",
-						String::from_utf8_lossy(&output.stderr)
-					),
-				))
-			}
-		}
 		#[cfg(target_os = "ios")]
 		{
 			use std::ffi::CString;
@@ -202,7 +174,7 @@ impl HardwareModel {
 			Ok(Self::Android)
 		}
 
-		#[cfg(not(any(target_os = "macos", target_os = "ios", target_os = "android")))]
+		#[cfg(not(any(target_os = "ios", target_os = "android")))]
 		{
 			Ok(Self::Other)
 		}

@@ -10,17 +10,15 @@ mod utils;
 #[cfg(target_os = "windows")]
 const BINDING_LOCATION: &str = ".";
 
-#[cfg(target_os = "macos")]
-const BINDING_LOCATION: &str = "../Frameworks/Spacedrive.framework/Libraries";
+
 
 #[cfg(target_os = "windows")]
 const LIB_NAME: &str = "onnxruntime.dll";
 
-#[cfg(any(target_os = "macos", target_os = "ios"))]
-const LIB_NAME: &str = "libonnxruntime.dylib";
+
 
 pub fn init() -> Result<(), Error> {
-	#[cfg(any(target_os = "macos", target_os = "ios", target_os = "windows"))]
+	#[cfg(target_os = "windows")]
 	{
 		use std::path::Path;
 		let path = utils::get_path_relative_to_exe(Path::new(BINDING_LOCATION).join(LIB_NAME));
@@ -31,15 +29,7 @@ pub fn init() -> Result<(), Error> {
 	EnvironmentBuilder::default()
 		.with_name("spacedrive")
 		.with_execution_providers({
-			#[cfg(any(target_os = "macos", target_os = "ios"))]
-			{
-				use ort::{CoreMLExecutionProvider, XNNPACKExecutionProvider};
 
-				[
-					CoreMLExecutionProvider::default().build(),
-					XNNPACKExecutionProvider::default().build(),
-				]
-			}
 
 			#[cfg(target_os = "windows")]
 			{

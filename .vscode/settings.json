@@ -60,14 +60,10 @@
 		"**/*.contentlayer": true,
 		"**/*.next": true,
 		"**/dist": true,
-		"apps/mobile/ios/Pods": true,
-		"apps/mobile/android": true,
-		"apps/mobile/ios": true
+
 	},
 	"eslint.workingDirectories": [
 		"apps/desktop",
-		"apps/landing",
-		"apps/mobile",
 		"interface",
 		"packages/client",
 		"packages/config",
@@ -93,10 +89,7 @@
 	"rust-analyzer.check.targets": null,
 	"rust-analyzer.showUnlinkedFileNotification": false,
 	"i18n-ally.localesPaths": [
-		"interface/locales",
-		"apps/mobile/ios/Pods/RCT-Folly/folly/lang",
-		"apps/mobile/ios/Pods/boost/boost/locale",
-		"apps/mobile/ios/Pods/boost/boost/predef/language"
+		"interface/locales"
 	],
 	"i18n-ally.enabledParsers": ["ts", "json"],
 	"i18n-ally.sortKeys": true,

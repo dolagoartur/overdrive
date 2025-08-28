@@ -2,10 +2,7 @@
 target/
 dist/
 
-# Mobile build artifacts
-apps/mobile/.expo
-apps/mobile/android/app/build
-apps/mobile/modules/sd-core/android/build
+# Mobile build artifacts (removed)
 
 # macOS/iOS product/cache
 .build/

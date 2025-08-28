@@ -13,9 +13,6 @@
 		"desktop": "pnpm --filter @sd/desktop --",
 		"tauri": "pnpm desktop tauri",
 
-		"mobile": "pnpm --filter @sd/mobile --",
-		"core": "pnpm --filter @sd/server -- ",
-
 		"ui": "pnpm --filter @sd/ui -- ",
 		"interface": "pnpm --filter @sd/interface -- ",
 		"assets": "pnpm --filter @sd/assets -- ",
@@ -36,8 +33,7 @@
 	"pnpm": {
 		"patchedDependencies": {
 			"@remix-run/router@1.13.1": "patches/@remix-run__router@1.13.1.patch",
-			"tailwindcss-animate@1.0.7": "patches/tailwindcss-animate@1.0.7.patch",
-			"@react-navigation/drawer@6.6.15": "patches/@react-navigation__drawer@6.6.15.patch"
+			"tailwindcss-animate@1.0.7": "patches/tailwindcss-animate@1.0.7.patch"
 		},
 		"overrides": {
 			"@types/node": ">18.18.x",

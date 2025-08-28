@@ -33,12 +33,6 @@ use super::LocationManagerError;
 #[cfg(target_os = "linux")]
 mod linux;
 
-#[cfg(target_os = "macos")]
-mod macos;
-
-#[cfg(target_os = "windows")]
-mod windows;
-
 #[cfg(target_os = "ios")]
 mod ios;
 
@@ -52,12 +46,6 @@ use utils::reject_event;
 #[cfg(target_os = "linux")]
 type Handler = linux::EventHandler;
 
-#[cfg(target_os = "macos")]
-type Handler = macos::EventHandler;
-
-#[cfg(target_os = "windows")]
-type Handler = windows::EventHandler;
-
 #[cfg(target_os = "android")]
 type Handler = android::EventHandler;
 
@@ -68,7 +56,7 @@ pub(super) type IgnorePath = (PathBuf, bool);
 
 type INode = u64;
 
-#[cfg(any(target_os = "ios", target_os = "macos", target_os = "windows"))]
+#[cfg(target_os = "ios")]
 type InstantAndPath = (Instant, PathBuf);
 
 const ONE_SECOND: Duration = Duration::from_secs(1);
@@ -808,8 +796,7 @@ mod tests {
 		#[cfg(target_os = "windows")]
 		expect_event(events_rx, &file_path, EventKind::Remove(RemoveKind::Any)).await;
 
-		#[cfg(target_os = "macos")]
-		expect_event(events_rx, &file_path, EventKind::Remove(RemoveKind::File)).await;
+
 
 		#[cfg(target_os = "linux")]
 		expect_event(events_rx, &file_path, EventKind::Remove(RemoveKind::File)).await;
@@ -863,8 +850,7 @@ mod tests {
 		#[cfg(target_os = "windows")]
 		expect_event(events_rx, &dir_path, EventKind::Remove(RemoveKind::Any)).await;
 
-		#[cfg(target_os = "macos")]
-		expect_event(events_rx, &dir_path, EventKind::Remove(RemoveKind::Folder)).await;
+
 
 		#[cfg(target_os = "linux")]
 		expect_event(events_rx, &dir_path, EventKind::Remove(RemoveKind::Folder)).await;

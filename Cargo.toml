@@ -2,10 +2,6 @@
 members = [
 	"apps/desktop/crates/*",
 	"apps/desktop/src-tauri",
-	"apps/mobile/modules/sd-core/android/crate",
-	"apps/mobile/modules/sd-core/core",
-	"apps/mobile/modules/sd-core/ios/crate",
-	"apps/server",
 	"core",
 	"core/crates/*",
 	"crates/*"

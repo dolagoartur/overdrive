@@ -6242,16 +6242,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6877bb514081ee2a7ff5ef9de3281f14a4dd4bceac4c09388074a6b5df8a139a"
 
 [[package]]
-name = "mime_guess"
-version = "2.0.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f7c44f8e672c00fe5308fa235f821cb4198414e1c77935c1ab6948d3fd78550e"
-dependencies = [
- "mime",
- "unicase",
-]
-
-[[package]]
 name = "mini-moka"
 version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10458,36 +10448,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sd-mobile-android"
-version = "0.1.0"
-dependencies = [
- "jni 0.21.1",
- "sd-mobile-core",
- "tracing",
-]
-
-[[package]]
-name = "sd-mobile-core"
-version = "0.1.0"
-dependencies = [
- "futures",
- "futures-channel",
- "futures-locks",
- "rspc",
- "sd-core",
- "serde_json",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "sd-mobile-ios"
-version = "0.1.0"
-dependencies = [
- "sd-mobile-core",
-]
-
-[[package]]
 name = "sd-old-p2p"
 version = "0.2.0"
 dependencies = [
@@ -10557,23 +10517,6 @@ dependencies = [
  "sd-sync",
  "serde",
  "uuid",
-]
-
-[[package]]
-name = "sd-server"
-version = "0.1.0"
-dependencies = [
- "axum",
- "axum-extra",
- "http 1.2.0",
- "include_dir",
- "mime_guess",
- "rspc",
- "sd-core",
- "secstr",
- "tempfile",
- "tokio",
- "tracing",
 ]
 
 [[package]]
@@ -10651,15 +10594,6 @@ dependencies = [
  "pkcs8",
  "subtle",
  "zeroize",
-]
-
-[[package]]
-name = "secstr"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e04f657244f605c4cf38f6de5993e8bd050c8a303f86aeabff142d5c7c113e12"
-dependencies = [
- "libc",
 ]
 
 [[package]]

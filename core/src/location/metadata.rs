@@ -257,11 +257,7 @@ impl SpacedriveLocationMetadataFile {
 		// we want to write the file if it exists, otherwise create it
 		file_options.create(true).write(true);
 
-		#[cfg(target_os = "windows")]
-		{
-			use windows::Win32::Storage::FileSystem::FILE_ATTRIBUTE_HIDDEN;
-			file_options.attributes(FILE_ATTRIBUTE_HIDDEN.0);
-		}
+
 
 		let metadata_contents = serde_json::to_vec(&self.metadata)
 			.map_err(|e| LocationMetadataError::Serialize(e, self.path.clone()))?;

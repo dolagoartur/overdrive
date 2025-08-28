@@ -2,10 +2,416 @@
 
 ## Overview
 
-This design outlines the systematic approach to reducing Overdrive's scope from a multi-platform application to a focused Linux desktop and Android mobile solution. The design prioritizes safety, maintains functionality, and ensures a clean, maintainable codebase.
+This design outlines the systematic approach to completing Overdrive's scope reduction from a multi-platform application to a focused Linux desktop and Android mobile solution. Several applications have already been removed (storybook, landing, web), and this phase will complete the remaining cleanup tasks. The design prioritizes safety, maintains functionality, and ensures a clean, maintainable codebase.
 
 ## Architecture
 
 ### Current State Analysis
 
-```mermaid\ngraph TB\n    subgraph \"Current Applications\"\n        A[Desktop - Tauri] \n        B[Mobile - React Native]\n        C[Web - Vite/React]\n        D[Landing - Next.js]\n        E[Server - Axum]\n        F[Storybook - Storybook]\n    end\n    \n    subgraph \"Shared Packages\"\n        G[packages/client]\n        H[packages/ui]\n        I[packages/config]\n        J[packages/assets]\n        K[interface/]\n    end\n    \n    subgraph \"Core Rust\"\n        L[core/]\n        M[crates/*]\n    end\n    \n    A --> G\n    A --> H\n    A --> K\n    B --> G\n    C --> G\n    C --> K\n    D --> H\n    \n    G --> I\n    H --> I\n    K --> G\n    K --> H\n    \n    A --> L\n    E --> L\n```\n\n### Target State Architecture\n\n```mermaid\ngraph TB\n    subgraph \"Target Applications\"\n        A[Desktop - Tauri Linux]\n        A2[Future: Mobile - Tauri Android]\n    end\n    \n    subgraph \"Retained Packages\"\n        G[packages/client]\n        H[packages/ui]\n        I[packages/config]\n        J[packages/assets]\n        K[interface/]\n    end\n    \n    subgraph \"Core Rust - Linux Focus\"\n        L[core/ - Linux optimized]\n        M[crates/* - Essential only]\n    end\n    \n    A --> G\n    A --> H\n    A --> K\n    A2 -.-> G\n    A2 -.-> H\n    \n    G --> I\n    H --> I\n    K --> G\n    K --> H\n    \n    A --> L\n    A2 -.-> L\n    \n    style A2 fill:#e1f5fe\n    style A fill:#c8e6c9\n```\n\n## Components and Interfaces\n\n### 1. Application Removal Strategy\n\n#### Safe Removal Order\n1. **Storybook** (lowest risk - development tool only)\n2. **Landing Page** (low risk - no shared dependencies)\n3. **Web App** (medium risk - shares interface components)\n4. **Server App** (medium risk - shares core Rust code)\n5. **Mobile App** (highest risk - most complex dependencies)\n\n#### Dependency Validation Process\n```rust\n// Pseudo-code for validation\nstruct RemovalValidator {\n    retained_apps: Vec<App>,\n    shared_packages: Vec<Package>,\n}\n\nimpl RemovalValidator {\n    fn validate_removal(&self, app: &App) -> Result<(), RemovalError> {\n        // Check if any retained apps depend on this app\n        for retained in &self.retained_apps {\n            if retained.depends_on(app) {\n                return Err(RemovalError::HasDependents);\n            }\n        }\n        \n        // Check if removing this app breaks shared packages\n        for package in &self.shared_packages {\n            if package.only_used_by(app) {\n                return Err(RemovalError::OrphansPackage);\n            }\n        }\n        \n        Ok(())\n    }\n}\n```\n\n### 2. Platform-Specific Code Removal\n\n#### Conditional Compilation Cleanup\n```rust\n// Before: Multiple platform support\n#[cfg(target_os = \"windows\")]\nuse crate::volume::windows::WindowsVolume;\n#[cfg(target_os = \"macos\")]\nuse crate::volume::macos::MacOsVolume;\n#[cfg(target_os = \"linux\")]\nuse crate::volume::linux::LinuxVolume;\n\n// After: Linux-focused\nuse crate::volume::linux::LinuxVolume;\n\n// Keep Android preparation\n#[cfg(target_os = \"android\")]\nuse crate::volume::android::AndroidVolume;\n```\n\n#### File System Module Restructure\n```rust\n// core/src/volume/mod.rs - Before\npub mod linux;\n#[cfg(target_os = \"macos\")]\npub mod macos;\n#[cfg(target_os = \"windows\")]\npub mod windows;\n\n// core/src/volume/mod.rs - After\npub mod linux;\n#[cfg(target_os = \"android\")]\npub mod android;\n\npub use linux::LinuxVolume as Volume;\n#[cfg(target_os = \"android\")]\npub use android::AndroidVolume as Volume;\n```\n\n### 3. Dependency Management\n\n#### Cargo Workspace Cleanup\n```toml\n# Cargo.toml - Before\n[workspace]\nmembers = [\n    \"apps/desktop/crates/*\",\n    \"apps/desktop/src-tauri\",\n    \"apps/mobile/modules/sd-core/android/crate\",  # Remove\n    \"apps/mobile/modules/sd-core/core\",           # Remove\n    \"apps/mobile/modules/sd-core/ios/crate\",      # Remove\n    \"apps/server\",                                # Remove\n    \"core\",\n    \"core/crates/*\",\n    \"crates/*\"\n]\n\n# Cargo.toml - After\n[workspace]\nmembers = [\n    \"apps/desktop/crates/*\",\n    \"apps/desktop/src-tauri\",\n    \"core\",\n    \"core/crates/*\",\n    \"crates/*\"\n]\n```\n\n#### Platform Dependencies Removal\n```toml\n# Remove Windows dependencies\n[target.'cfg(windows)'.workspace.dependencies]\nwindows = { version = \"0.58\", features = [...] }  # DELETE\n\n# Remove macOS dependencies  \n[target.'cfg(target_os = \"macos\")'.dependencies]\ncocoa = \"0.25\"     # DELETE\nobjc = \"0.2\"       # DELETE\n\n# Remove iOS dependencies\n[target.'cfg(target_os = \"ios\")'.workspace.dependencies]\nswift-rs = \"1.0.7\"  # DELETE\n\n# Keep Android dependencies for future\n[target.'cfg(target_os = \"android\")'.workspace.dependencies]\njni = \"0.21\"  # KEEP\n```\n\n### 4. Build System Optimization\n\n#### Package.json Workspace Update\n```json\n{\n  \"scripts\": {\n    // Remove these scripts\n    \"landing-web\": \"...\",     // DELETE\n    \"web\": \"...\",             // DELETE  \n    \"mobile\": \"...\",          // DELETE\n    \"landing\": \"...\",         // DELETE\n    \"storybook\": \"...\",       // DELETE\n    \"dev:web\": \"...\",         // DELETE\n    \n    // Keep these scripts\n    \"desktop\": \"pnpm --filter @sd/desktop --\",\n    \"tauri\": \"pnpm desktop tauri\",\n    \"dev:desktop\": \"pnpm run --filter @sd/desktop tauri dev\",\n    \"bootstrap:desktop\": \"cargo clean && ./scripts/setup.sh && pnpm i && pnpm prep && pnpm tauri dev\"\n  }\n}\n```\n\n#### Tauri Configuration Update\n```json\n{\n  \"bundle\": {\n    \"targets\": [\n      \"appimage\",    // Keep - Linux\n      \"deb\"          // Keep - Linux\n      // Remove: \"dmg\", \"msi\", \"nsis\"\n    ]\n  },\n  \"plugins\": {\n    // Remove platform-specific plugins\n  }\n}\n```\n\n## Data Models\n\n### Removal Tracking\n```typescript\ninterface RemovalPlan {\n  applications: {\n    name: string;\n    path: string;\n    dependencies: string[];\n    riskLevel: 'low' | 'medium' | 'high';\n    removalOrder: number;\n  }[];\n  \n  platformCode: {\n    files: string[];\n    conditionalBlocks: string[];\n    dependencies: string[];\n  };\n  \n  buildTargets: {\n    cargo: string[];\n    tauri: string[];\n    npm: string[];\n  };\n}\n```\n\n### Validation Results\n```typescript\ninterface ValidationResult {\n  buildSuccess: boolean;\n  testsPassing: boolean;\n  performanceMetrics: {\n    buildTime: number;\n    binarySize: number;\n    dependencyCount: number;\n  };\n  regressions: string[];\n}\n```\n\n## Error Handling\n\n### Removal Safety Checks\n1. **Pre-removal Validation**:\n   - Verify no critical dependencies\n   - Create backup of current state\n   - Run full test suite\n\n2. **During Removal**:\n   - Incremental removal with validation\n   - Immediate rollback on critical errors\n   - Continuous integration testing\n\n3. **Post-removal Validation**:\n   - Full build verification\n   - Functionality testing\n   - Performance benchmarking\n\n### Error Recovery Strategy\n```bash\n#!/bin/bash\n# Rollback script for failed removals\nrollback_removal() {\n    local backup_branch=\"$1\"\n    echo \"Rolling back to $backup_branch\"\n    git checkout \"$backup_branch\"\n    pnpm install\n    cargo build\n    echo \"Rollback complete\"\n}\n```\n\n## Testing Strategy\n\n### Automated Testing Pipeline\n```yaml\n# .github/workflows/scope-reduction.yml\nname: Scope Reduction Validation\non: [push, pull_request]\n\njobs:\n  validate-removal:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout\n        uses: actions/checkout@v3\n      \n      - name: Setup Environment\n        run: ./scripts/setup-overdrive.sh\n      \n      - name: Build Desktop App\n        run: pnpm desktop tauri build\n      \n      - name: Run Tests\n        run: |\n          cargo test\n          pnpm typecheck\n      \n      - name: Performance Benchmark\n        run: ./scripts/benchmark.sh\n      \n      - name: Validate Functionality\n        run: ./scripts/validate-functionality.sh\n```\n\n### Manual Testing Checklist\n- [ ] Desktop app builds successfully\n- [ ] Desktop app launches without errors\n- [ ] File operations work correctly\n- [ ] Settings and preferences preserved\n- [ ] Database migrations work\n- [ ] Performance meets benchmarks\n\n## Performance Considerations\n\n### Expected Improvements\n1. **Build Time**: 30-50% reduction\n   - Fewer Rust crates to compile\n   - Fewer Node.js packages to process\n   - Simplified dependency resolution\n\n2. **Binary Size**: 20-40% reduction\n   - Removed platform-specific code\n   - Fewer bundled dependencies\n   - Optimized for single platform\n\n3. **Development Experience**: \n   - Faster hot reloads\n   - Simpler debugging\n   - Reduced context switching\n\n### Benchmarking Strategy\n```rust\n// Performance benchmarking\n#[cfg(test)]\nmod benchmarks {\n    use criterion::{black_box, criterion_group, criterion_main, Criterion};\n    \n    fn bench_file_operations(c: &mut Criterion) {\n        c.bench_function(\"file_scan\", |b| {\n            b.iter(|| {\n                // Benchmark file scanning performance\n                black_box(scan_directory(\"/tmp/test\"))\n            })\n        });\n    }\n    \n    criterion_group!(benches, bench_file_operations);\n    criterion_main!(benches);\n}\n```\n\n## Security Considerations\n\n### Safe Removal Process\n1. **Data Preservation**: Ensure no user data is lost\n2. **Configuration Migration**: Preserve user settings\n3. **Backup Strategy**: Create recovery points\n4. **Validation**: Comprehensive testing before finalization\n\n### Linux-Specific Security\n1. **File Permissions**: Proper handling of Linux file permissions\n2. **Sandboxing**: Maintain Tauri security model\n3. **System Integration**: Safe interaction with Linux desktop\n\nThis design provides a comprehensive, safe approach to reducing Overdrive's scope while maintaining all essential functionality and improving performance and maintainability."
+```mermaid
+graph TB
+    subgraph "Current Applications"
+        A[Desktop - Tauri]
+        B[Mobile - React Native]
+    end
+
+    subgraph "Shared Packages"
+        G[packages/client]
+        H[packages/ui]
+        I[packages/config]
+        J[packages/assets]
+        K[interface/]
+    end
+
+    subgraph "Core Rust"
+        L[core/]
+        M[crates/*]
+    end
+
+    subgraph "Legacy References"
+        N[Server scripts in package.json]
+        O[Platform-specific code]
+        P[Unused dependencies]
+    end
+
+    A --> G
+    A --> H
+    A --> K
+    B --> G
+
+    G --> I
+    H --> I
+    K --> G
+    K --> H
+
+    A --> L
+
+    style B fill:#ffcdd2
+    style N fill:#ffcdd2
+    style O fill:#ffcdd2
+    style P fill:#ffcdd2
+```
+
+### Target State Architecture
+
+```mermaid
+graph TB
+    subgraph "Target Applications"
+        A[Desktop - Tauri Linux]
+        A2[Future: Mobile - Tauri Android]
+    end
+
+    subgraph "Retained Packages"
+        G[packages/client]
+        H[packages/ui]
+        I[packages/config]
+        J[packages/assets]
+        K[interface/]
+    end
+
+    subgraph "Core Rust - Linux Focus"
+        L[core/ - Linux optimized]
+        M[crates/* - Essential only]
+    end
+
+    A --> G
+    A --> H
+    A --> K
+    A2 -.-> G
+    A2 -.-> H
+
+    G --> I
+    H --> I
+    K --> G
+    K --> H
+
+    A --> L
+    A2 -.-> L
+
+    style A2 fill:#e1f5fe
+    style A fill:#c8e6c9
+```
+
+## Components and Interfaces
+
+### 1. Remaining Cleanup Strategy
+
+#### Priority Order
+1. **Mobile App** (highest risk - React Native dependencies and complex setup)
+2. **Server References** (medium risk - cleanup package.json scripts)
+3. **Platform-Specific Code** (medium risk - conditional compilation cleanup)
+4. **Unused Dependencies** (low risk - dependency tree optimization)
+
+#### Dependency Validation Process
+```rust
+// Validation approach for remaining removals
+struct CleanupValidator {
+    desktop_app: App,
+    shared_packages: Vec<Package>,
+}
+
+impl CleanupValidator {
+    fn validate_mobile_removal(&self) -> Result<(), CleanupError> {
+        // Ensure desktop app doesn't depend on mobile-specific code
+        if self.desktop_app.has_mobile_dependencies() {
+            return Err(CleanupError::HasCriticalDependencies);
+        }
+
+        // Check shared packages still work without mobile
+        for package in &self.shared_packages {
+            if !package.works_without_mobile() {
+                return Err(CleanupError::BreaksSharedPackage);
+            }
+        }
+
+        Ok(())
+    }
+}
+```
+
+### 2. Platform-Specific Code Removal
+
+#### Conditional Compilation Cleanup
+```rust
+// Before: Multiple platform support
+#[cfg(target_os = "windows")]
+use crate::volume::windows::WindowsVolume;
+#[cfg(target_os = "macos")]
+use crate::volume::macos::MacOsVolume;
+#[cfg(target_os = "linux")]
+use crate::volume::linux::LinuxVolume;
+
+// After: Linux-focused with Android preparation
+use crate::volume::linux::LinuxVolume;
+
+#[cfg(target_os = "android")]
+use crate::volume::android::AndroidVolume;
+```
+
+#### File System Module Restructure
+```rust
+// core/src/volume/mod.rs - Before
+pub mod linux;
+#[cfg(target_os = "macos")]
+pub mod macos;
+#[cfg(target_os = "windows")]
+pub mod windows;
+
+// core/src/volume/mod.rs - After
+pub mod linux;
+#[cfg(target_os = "android")]
+pub mod android;
+
+pub use linux::LinuxVolume as Volume;
+#[cfg(target_os = "android")]
+pub use android::AndroidVolume as Volume;
+```
+
+### 3. Dependency Management
+
+#### Cargo Workspace Cleanup
+```toml
+# Cargo.toml - Current state needs cleanup
+[workspace]
+members = [
+    "apps/desktop/crates/*",
+    "apps/desktop/src-tauri",
+    "apps/mobile/modules/sd-core/android/crate",  # Remove
+    "apps/mobile/modules/sd-core/core",           # Remove
+    "apps/mobile/modules/sd-core/ios/crate",      # Remove
+    "core",
+    "core/crates/*",
+    "crates/*"
+]
+
+# Cargo.toml - Target state
+[workspace]
+members = [
+    "apps/desktop/crates/*",
+    "apps/desktop/src-tauri",
+    "core",
+    "core/crates/*",
+    "crates/*"
+]
+```
+
+#### Platform Dependencies Removal
+```toml
+# Remove Windows dependencies
+[target.'cfg(windows)'.workspace.dependencies]
+windows = { version = "0.58", features = [...] }  # DELETE
+
+# Remove macOS dependencies
+[target.'cfg(target_os = "macos")'.dependencies]
+cocoa = "0.25"     # DELETE
+objc = "0.2"       # DELETE
+
+# Remove iOS dependencies
+[target.'cfg(target_os = "ios")'.workspace.dependencies]
+swift-rs = "1.0.7"  # DELETE
+
+# Keep Android dependencies for future
+[target.'cfg(target_os = "android")'.workspace.dependencies]
+jni = "0.21"  # KEEP
+```
+
+### 4. Build System Optimization
+
+#### Package.json Cleanup
+```json
+{
+  "scripts": {
+    // Remove remaining unused scripts
+    "mobile": "pnpm --filter @sd/mobile --",      // DELETE
+    "core": "pnpm --filter @sd/server -- ",       // DELETE (server reference)
+
+    // Keep essential scripts
+    "desktop": "pnpm --filter @sd/desktop --",
+    "tauri": "pnpm desktop tauri",
+    "dev:desktop": "pnpm run --filter @sd/desktop tauri dev",
+    "bootstrap:desktop": "cargo clean && ./scripts/setup.sh && pnpm i && pnpm prep && pnpm tauri dev"
+  }
+}
+```
+
+#### Tauri Configuration Update
+```json
+{
+  "bundle": {
+    "targets": [
+      "appimage",    // Keep - Linux
+      "deb"          // Keep - Linux
+      // Remove: "dmg", "msi", "nsis"
+    ]
+  },
+  "plugins": {
+    // Remove platform-specific plugins
+  }
+}
+```
+
+## Data Models
+
+### Cleanup Tracking
+```typescript
+interface CleanupPlan {
+  remainingApps: {
+    name: string;
+    path: string;
+    dependencies: string[];
+    riskLevel: 'low' | 'medium' | 'high';
+  }[];
+
+  platformCode: {
+    files: string[];
+    conditionalBlocks: string[];
+    dependencies: string[];
+  };
+
+  scriptCleanup: {
+    packageJsonScripts: string[];
+    workspaceReferences: string[];
+  };
+}
+```
+
+### Validation Results
+```typescript
+interface ValidationResult {
+  buildSuccess: boolean;
+  testsPassing: boolean;
+  performanceMetrics: {
+    buildTime: number;
+    binarySize: number;
+    dependencyCount: number;
+  };
+  regressions: string[];
+}
+```
+
+## Error Handling
+
+### Cleanup Safety Checks
+1. **Pre-cleanup Validation**:
+   - Verify desktop app builds successfully
+   - Create backup of current state
+   - Run full test suite
+
+2. **During Cleanup**:
+   - Incremental removal with validation
+   - Immediate rollback on critical errors
+   - Continuous build verification
+
+3. **Post-cleanup Validation**:
+   - Full build verification
+   - Functionality testing
+   - Performance benchmarking
+
+### Error Recovery Strategy
+```bash
+#!/bin/bash
+# Rollback script for failed cleanup
+rollback_cleanup() {
+    local backup_branch="$1"
+    echo "Rolling back to $backup_branch"
+    git checkout "$backup_branch"
+    pnpm install
+    cargo build
+    echo "Rollback complete"
+}
+```
+
+## Testing Strategy
+
+### Automated Testing Pipeline
+```yaml
+# .github/workflows/scope-reduction.yml
+name: Scope Reduction Validation
+on: [push, pull_request]
+
+jobs:
+  validate-cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Environment
+        run: ./scripts/setup-overdrive.sh
+
+      - name: Build Desktop App
+        run: pnpm desktop tauri build
+
+      - name: Run Tests
+        run: |
+          cargo test
+          pnpm typecheck
+
+      - name: Performance Benchmark
+        run: ./scripts/measure-metrics.sh
+
+      - name: Validate Functionality
+        run: ./scripts/validate-environment.sh
+```
+
+### Manual Testing Checklist
+- [ ] Desktop app builds successfully
+- [ ] Desktop app launches without errors
+- [ ] File operations work correctly
+- [ ] Settings and preferences preserved
+- [ ] Database migrations work
+- [ ] Performance meets benchmarks
+
+## Performance Considerations
+
+### Expected Improvements
+1. **Build Time**: 30-50% reduction
+   - Fewer Rust crates to compile
+   - Fewer Node.js packages to process
+   - Simplified dependency resolution
+
+2. **Binary Size**: 20-40% reduction
+   - Removed platform-specific code
+   - Fewer bundled dependencies
+   - Optimized for single platform
+
+3. **Development Experience**:
+   - Faster hot reloads
+   - Simpler debugging
+   - Reduced context switching
+
+### Benchmarking Strategy
+```rust
+// Performance benchmarking
+#[cfg(test)]
+mod benchmarks {
+    use criterion::{black_box, criterion_group, criterion_main, Criterion};
+
+    fn bench_file_operations(c: &mut Criterion) {
+        c.bench_function("file_scan", |b| {
+            b.iter(|| {
+                // Benchmark file scanning performance
+                black_box(scan_directory("/tmp/test"))
+            })
+        });
+    }
+
+    criterion_group!(benches, bench_file_operations);
+    criterion_main!(benches);
+}
+```
+
+## Security Considerations
+
+### Safe Cleanup Process
+1. **Data Preservation**: Ensure no user data is lost
+2. **Configuration Migration**: Preserve user settings
+3. **Backup Strategy**: Create recovery points
+4. **Validation**: Comprehensive testing before finalization
+
+### Linux-Specific Security
+1. **File Permissions**: Proper handling of Linux file permissions
+2. **Sandboxing**: Maintain Tauri security model
+3. **System Integration**: Safe interaction with Linux desktop
+
+This design provides a comprehensive, safe approach to completing Overdrive's scope reduction while maintaining all essential functionality and improving performance and maintainability.

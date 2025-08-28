@@ -18,12 +18,6 @@ pub enum Platform {
 impl Platform {
 	#[allow(unreachable_code)]
 	pub fn current() -> Self {
-		#[cfg(target_os = "windows")]
-		return Self::Windows;
-
-		#[cfg(target_os = "macos")]
-		return Self::MacOS;
-
 		#[cfg(target_os = "linux")]
 		return Self::Linux;
 

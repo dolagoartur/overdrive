@@ -263,19 +263,7 @@ pub static NO_SYSTEM_FILES: LazyLock<SystemIndexerRule> = LazyLock::new(|| {
 					// Thumbnails
 					"**/._*",
 				],
-				#[cfg(target_os = "macos")]
-				vec![
-					"/{System,Network,Library,Applications,.PreviousSystemInformation,.com.apple.templatemigration.boot-install}",
-					"/System/Volumes/Data/{System,Network,Library,Applications,.PreviousSystemInformation,.com.apple.templatemigration.boot-install}",
-					"/Users/*/{Library,Applications}",
-					"/System/Volumes/Data/Users/*/{Library,Applications}",
-					"**/*.photoslibrary/{database,external,private,resources,scope}",
-					// Files that might appear in the root of a volume
-					"**/.{DocumentRevisions-V100,fseventsd,Spotlight-V100,TemporaryItems,Trashes,VolumeIcon.icns,com.apple.timemachine.donotpresent}",
-					// Directories potentially created on remote AFP share
-					"**/.{AppleDB,AppleDesktop,apdisk}",
-					"**/{Network Trash Folder,Temporary Items}",
-				],
+
 				// https://github.com/github/gitignore/blob/main/Global/Linux.gitignore
 				#[cfg(target_os = "linux")]
 				vec![

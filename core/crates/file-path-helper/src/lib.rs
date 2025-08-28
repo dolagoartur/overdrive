@@ -74,30 +74,9 @@ pub fn path_is_hidden(path: impl AsRef<Path>, metadata: &Metadata) -> bool {
 		}
 	}
 
-	#[cfg(target_os = "macos")]
-	{
-		use std::os::macos::fs::MetadataExt;
 
-		// https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/FileSystemDetails/FileSystemDetails.html#:~:text=UF_HIDDEN
-		const UF_HIDDEN: u32 = 0x8000;
 
-		if (metadata.st_flags() & UF_HIDDEN) == UF_HIDDEN {
-			return true;
-		}
-	}
 
-	#[cfg(target_family = "windows")]
-	{
-		use std::os::windows::fs::MetadataExt;
-
-		const FILE_ATTRIBUTE_HIDDEN: u32 = 0x2;
-
-		let _ = path; // just to avoid warnings on Windows
-
-		if (metadata.file_attributes() & FILE_ATTRIBUTE_HIDDEN) == FILE_ATTRIBUTE_HIDDEN {
-			return true;
-		}
-	}
 
 	false
 }

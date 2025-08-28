@@ -2,23 +2,22 @@
 
 ## Introduction
 
-This phase focuses on reducing Overdrive's scope to Linux desktop and Android mobile platforms only, removing all Windows, macOS, iOS, web, and server components. The goal is to simplify the codebase, reduce build complexity, and improve development velocity while preserving all essential functionality for the target platforms.
+This phase focuses on completing the reduction of Overdrive's scope to Linux desktop and Android mobile platforms only. Several applications have already been removed (storybook, landing, web), and this phase will complete the removal of remaining unused components (mobile app, server), platform-specific code (Windows, macOS, iOS), and associated dependencies. The goal is to simplify the codebase, reduce build complexity, and improve development velocity while preserving all essential functionality for the target platforms.
 
 ## Requirements
 
-### Requirement 1: Remove Unused Applications
+### Requirement 1: Complete Application Removal
 
-**User Story:** As a developer working on Overdrive, I want unused applications removed so that the codebase is focused and maintainable.
+**User Story:** As a developer working on Overdrive, I want remaining unused applications removed so that the codebase is focused and maintainable.
 
 #### Acceptance Criteria
 
 1. WHEN removing mobile app THEN the entire `apps/mobile/` directory SHALL be deleted
-2. WHEN removing web app THEN the entire `apps/web/` directory SHALL be deleted
-3. WHEN removing landing page THEN the entire `apps/landing/` directory SHALL be deleted
-4. WHEN removing server app THEN the entire `apps/server/` directory SHALL be deleted
-5. WHEN removing storybook THEN the entire `apps/storybook/` directory SHALL be deleted
-6. WHEN applications are removed THEN the desktop app SHALL still build and run successfully
-7. WHEN applications are removed THEN no broken references SHALL remain in configuration files
+2. WHEN removing server references THEN all server-related scripts SHALL be removed from package.json
+3. WHEN applications are removed THEN the desktop app SHALL still build and run successfully
+4. WHEN applications are removed THEN no broken references SHALL remain in configuration files
+5. WHEN workspace is updated THEN only desktop app SHALL be included in workspace members
+6. WHEN cleanup is complete THEN build time SHALL be measurably reduced
 
 ### Requirement 2: Remove Platform-Specific Code
 

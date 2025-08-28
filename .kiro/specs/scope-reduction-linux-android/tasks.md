@@ -6,67 +6,43 @@
   - Document current build metrics for comparison
   - _Requirements: 7.1, 8.1_
 
-- [ ] 2. Remove unused applications
-  - [x] 2.1 Remove Storybook application
-    - Delete `apps/storybook/` directory completely
-    - Remove storybook references from root package.json scripts
-    - Update workspace configuration to exclude storybook
-    - Validate desktop app still builds and runs
-    - _Requirements: 1.1, 1.6, 1.7_
-
-  - [x] 2.2 Remove landing page application
-    - Delete `apps/landing/` directory completely
-    - Remove landing references from root package.json scripts
-    - Remove landing-web combined script from package.json
-    - Update workspace configuration to exclude landing
-    - Validate desktop app still builds and runs
-    - _Requirements: 1.1, 1.6, 1.7_
-
-  - [x] 2.3 Remove web application
-    - Delete `apps/web/` directory completely
-    - Remove web references from root package.json scripts
-    - Remove dev:web and web-related scripts from package.json
-    - Update workspace configuration to exclude web
-    - Validate desktop app still builds and runs
-    - _Requirements: 1.1, 1.6, 1.7_
-
-  - [ ] 2.4 Remove server application
-    - Delete `apps/server/` directory completely
-    - Remove server references from root package.json scripts
-    - Update Cargo.toml workspace members to exclude server
-    - Validate desktop app still builds and runs
-    - _Requirements: 1.1, 1.6, 1.7_
-
-  - [ ] 2.5 Remove mobile application
+- [ ] 2. Complete remaining application cleanup
+  - [x] 2.1 Remove mobile application
     - Delete `apps/mobile/` directory completely
     - Remove mobile references from root package.json scripts
     - Update Cargo.toml workspace members to exclude mobile crates
     - Remove React Native and Expo related dependencies
     - Validate desktop app still builds and runs
-    - _Requirements: 1.1, 1.6, 1.7_
+    - _Requirements: 1.1, 1.3, 1.4_
 
-- [ ] 3. Remove platform-specific code
-  - [ ] 3.1 Remove Windows-specific code
+  - [x] 2.2 Clean up server references
+    - Remove server-related scripts from root package.json
+    - Remove "core" script that references server filter
+    - Clean up any remaining server references in configuration
+    - Validate workspace configuration is clean
+    - _Requirements: 1.2, 1.4, 1.5_
+
+- [-] 3. Remove platform-specific code
+  - [x] 3.1 Remove Windows-specific code
     - Remove all `#[cfg(windows)]` conditional compilation blocks
     - Remove Windows-specific imports and modules
-    - Delete `core/src/volume/windows.rs` if it exists
+    - Delete Windows-specific files if they exist
     - Remove Windows-specific dependencies from Cargo.toml
     - Clean up unused imports after Windows code removal
     - _Requirements: 2.1, 2.4, 2.6_
 
-  - [ ] 3.2 Remove macOS-specific code
+  - [-] 3.2 Remove macOS-specific code
     - Remove all `#[cfg(target_os = "macos")]` conditional compilation blocks
     - Remove macOS-specific imports and modules
-    - Delete `core/src/volume/macos.rs` and `crates/utils/src/macos.rs`
-    - Remove macOS-specific dependencies (cocoa, objc) from Cargo.toml
+    - Delete macOS-specific files if they exist
+    - Remove macOS-specific dependencies from Cargo.toml
     - Clean up unused imports after macOS code removal
     - _Requirements: 2.2, 2.4, 2.6_
 
   - [ ] 3.3 Remove iOS-specific code
     - Remove all `#[cfg(target_os = "ios")]` conditional compilation blocks
     - Remove iOS-specific imports and modules
-    - Remove iOS-specific dependencies (swift-rs) from Cargo.toml
-    - Remove iOS mobile crate references from workspace
+    - Remove iOS-specific dependencies from Cargo.toml
     - Clean up unused imports after iOS code removal
     - _Requirements: 2.3, 2.4, 2.6_
 

@@ -298,7 +298,6 @@ packages/turbo-server/data/
 packages/turbo-server/uploads/
 apps/*/stats.html
 apps/.deps
-apps/mobile/.deps
 apps/releases/.vscode
 apps/desktop/src-tauri/tauri.conf.patch.json
 apps/desktop/src-tauri/*.dll

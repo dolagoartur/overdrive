@@ -64,12 +64,6 @@ async fn reload_webview(app_handle: AppHandle) {
 }
 
 fn reload_webview_inner(webview: PlatformWebview) {
-	#[cfg(target_os = "macos")]
-	{
-		unsafe {
-			sd_desktop_macos::reload_webview(&webview.inner().cast());
-		}
-	}
 	#[cfg(target_os = "linux")]
 	{
 		use webkit2gtk::WebViewExt;
@@ -134,19 +128,6 @@ async fn open_logs_dir(node: tauri::State<'_, Arc<Node>>) -> Result<(), ()> {
 #[tauri::command(async)]
 #[specta::specta]
 async fn open_trash_in_os_explorer() -> Result<(), ()> {
-	#[cfg(target_os = "macos")]
-	{
-		let full_path = format!("{}/.Trash/", std::env::var("HOME").unwrap());
-
-		Command::new("open")
-			.arg(full_path)
-			.spawn()
-			.map_err(|err| error!("Error opening trash: {err:#?}"))?
-			.wait()
-			.map_err(|err| error!("Error opening trash: {err:#?}"))?;
-
-		Ok(())
-	}
 
 	#[cfg(target_os = "windows")]
 	{
@@ -332,17 +313,7 @@ async fn main() -> tauri::Result<()> {
 			})
 		})
 		.on_window_event(move |window, event| match event {
-			// macOS expected behavior is for the app to not exit when the main window is closed.
-			// Instead, the window is hidden and the dock icon remains so that on user click it should show the window again.
-			#[cfg(target_os = "macos")]
-			WindowEvent::CloseRequested { api, .. } => {
-				// TODO: make this multi-window compatible in the future
-				window
-					.app_handle()
-					.hide()
-					.expect("Window should hide on macOS");
-				api.prevent_close();
-			}
+
 			WindowEvent::Resized(_) => {
 				let (_state, command) =
 					if window.is_fullscreen().expect("Can't get fullscreen state") {

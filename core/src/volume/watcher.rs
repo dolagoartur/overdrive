@@ -58,7 +58,6 @@ impl VolumeWatcher {
 					}
 					last_check = Instant::now();
 
-					#[cfg(any(target_os = "linux", target_os = "macos"))]
 					let discovered_volumes = match super::os::get_volumes().await {
 						Ok(volumes) => volumes,
 						Err(e) => {
@@ -67,9 +66,6 @@ impl VolumeWatcher {
 							vec![]
 						}
 					};
-
-					#[cfg(target_os = "windows")]
-					let discovered_volumes = super::os::get_volumes().await;
 
 					let actor = actor.lock().await;
 
@@ -138,87 +134,9 @@ impl VolumeWatcher {
 			});
 		}
 
-		#[cfg(target_os = "macos")]
-		{
-			use fsevent::{self, StreamFlags};
 
-			let (fs_tx, fs_rx) = std::sync::mpsc::channel();
-			let check_tx = check_tx.clone();
 
-			// Keep stream alive in the thread
-			std::thread::spawn(move || {
-				let mut stream = fsevent::FsEvent::new(vec![
-					"/Volumes".to_string(),
-					"/System/Volumes".to_string(),
-				]);
 
-				match stream.observe_async(fs_tx) {
-					Ok(_) => {
-						// Block thread to keep stream alive
-						std::thread::park();
-					}
-					Err(e) => {
-						error!("Failed to start FSEvent stream: {}", e);
-					}
-				}
-			});
-
-			tokio::spawn(async move {
-				while *running.read().await {
-					match fs_rx.recv() {
-						Ok(events) => {
-							// Only care about mount/unmount events
-							if events.flag.contains(StreamFlags::MOUNT)
-								|| events.flag.contains(StreamFlags::UNMOUNT)
-							{
-								debug!("Received volume event: {:?}", events);
-								if let Err(e) = check_tx.send(()).await {
-									error!("Failed to trigger volume check: {}", e);
-								}
-							}
-						}
-						Err(e) => {
-							error!("FSEvent receive error: {}", e);
-							sleep(Duration::from_millis(100)).await;
-						}
-					}
-				}
-			});
-		}
-
-		#[cfg(target_os = "windows")]
-		{
-			use ::windows::Win32::Storage::FileSystem::{FindFirstVolumeW, FindVolumeClose};
-
-			let check_tx = check_tx.clone();
-			tokio::spawn(async move {
-				while *running.read().await {
-					// Watch for volume arrival/removal
-					unsafe {
-						let mut volume_name = [0u16; 260];
-						let mut volume_change_detected = false;
-						match FindFirstVolumeW(volume_name.as_mut_slice()) {
-							Ok(handle) => {
-								if !handle.is_invalid() {
-									volume_change_detected = true;
-									FindVolumeClose(handle);
-								}
-							}
-							Err(e) => {
-								error!("Failed to get a volume handle: {}", e);
-							}
-						}
-						if volume_change_detected {
-							// Volume change detected
-							if let Err(e) = check_tx.send(()).await {
-								error!("Failed to trigger volume check: {}", e);
-							}
-						}
-					}
-					sleep(Duration::from_millis(100)).await;
-				}
-			});
-		}
 
 		Ok(())
 	}

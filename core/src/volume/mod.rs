@@ -54,12 +54,8 @@ impl VolumeExt for Volume {
 // Re-export platform-specific volume detection
 #[cfg(target_os = "linux")]
 pub use os::linux::get_volumes;
-#[cfg(target_os = "macos")]
-pub use os::macos::get_volumes;
 #[cfg(any(target_os = "ios", target_os = "android"))]
 pub use os::mobile::get_volumes;
-#[cfg(target_os = "windows")]
-pub use os::windows::get_volumes;
 
 // Internal utilities
 pub(crate) mod util {

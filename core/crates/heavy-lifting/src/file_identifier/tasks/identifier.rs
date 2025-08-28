@@ -437,35 +437,12 @@ fn handle_non_critical_errors(
 ) {
 	let formatted_error = format!("<file_path_pub_id='{file_path_pub_id}', error={e}>");
 
-	#[cfg(target_os = "windows")]
-	{
-		// Handle case where file is on-demand (NTFS only)
-		if e.source.raw_os_error().map_or(false, |code| code == 362) {
-			errors.push(
-				file_identifier::NonCriticalFileIdentifierError::FailedToExtractMetadataFromOnDemandFile(
-					formatted_error,
-				)
-				.into(),
-			);
-		} else {
-			errors.push(
-				file_identifier::NonCriticalFileIdentifierError::FailedToExtractFileMetadata(
-					formatted_error,
-				)
-				.into(),
-			);
-		}
-	}
-
-	#[cfg(not(target_os = "windows"))]
-	{
-		errors.push(
-			file_identifier::NonCriticalFileIdentifierError::FailedToExtractFileMetadata(
-				formatted_error,
-			)
-			.into(),
-		);
-	}
+	errors.push(
+		file_identifier::NonCriticalFileIdentifierError::FailedToExtractFileMetadata(
+			formatted_error,
+		)
+		.into(),
+	);
 }
 
 #[instrument(
