@@ -31,7 +31,7 @@
     - Clean up unused imports after Windows code removal
     - _Requirements: 2.1, 2.4, 2.6_
 
-  - [-] 3.2 Remove macOS-specific code
+  - [x] 3.2 Remove macOS-specific code
     - Remove all `#[cfg(target_os = "macos")]` conditional compilation blocks
     - Remove macOS-specific imports and modules
     - Delete macOS-specific files if they exist

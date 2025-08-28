@@ -126,27 +126,7 @@ impl PartialEq for OpenWithApplication {
 
 impl Eq for OpenWithApplication {}
 
-#[cfg(target_os = "macos")]
-async fn get_file_path_open_apps_set(path: PathBuf) -> Option<HashSet<OpenWithApplication>> {
-	let Some(path_str) = path.to_str() else {
-		error!(
-			"File path contains non-UTF8 characters: '{}'",
-			path.display()
-		);
-		return None;
-	};
 
-	let res = unsafe { sd_desktop_macos::get_open_with_applications(&path_str.into()) }
-		.as_slice()
-		.iter()
-		.map(|app| OpenWithApplication {
-			url: app.url.to_string(),
-			name: app.name.to_string(),
-		})
-		.collect::<HashSet<_>>();
-
-	Some(res)
-}
 
 #[cfg(target_os = "linux")]
 async fn get_file_path_open_apps_set(path: PathBuf) -> Option<HashSet<OpenWithApplication>> {
@@ -281,21 +261,11 @@ pub async fn open_file_path_with(
 				.iter()
 				.map(|(id, path)| {
 					let (Some(path), Some(url)) = (
-						#[cfg(any(target_os = "windows", target_os = "linux"))]
 						path.as_ref(),
-						#[cfg(target_os = "macos")]
-						path.as_ref()
-							.and_then(|path| path.to_str().map(str::to_string)),
 						url_by_id.get(id),
 					) else {
 						error!("File not found in database");
 						return Err(());
-					};
-
-					#[cfg(target_os = "macos")]
-					return {
-						sd_desktop_macos::open_file_paths_with(&[path], url);
-						Ok(())
 					};
 
 					#[cfg(target_os = "linux")]
@@ -310,8 +280,7 @@ pub async fn open_file_path_with(
 
 					#[cfg(not(any(
 						target_os = "windows",
-						target_os = "linux",
-						target_os = "macos"
+						target_os = "linux"
 					)))]
 					Err(())
 				})
@@ -331,21 +300,7 @@ pub async fn open_ephemeral_file_with(paths_and_urls: Vec<PathAndUrl>) -> Result
 			.collect::<HashMap<_, _>>() // Just to avoid duplicates
 			.into_iter()
 			.map(|(path, url)| async move {
-				#[cfg(target_os = "macos")]
-				if let Some(path) = path.to_str().map(str::to_string) {
-					if let Err(e) = spawn_blocking(move || {
-						sd_desktop_macos::open_file_paths_with(&[path], &url);
-					})
-					.await
-					{
-						error!("Error joining spawned task for opening files with: {e:#?}");
-					}
-				} else {
-					error!(
-						"File path contains non-UTF8 characters: '{}'",
-						path.display()
-					);
-				};
+
 
 				#[cfg(target_os = "linux")]
 				match spawn_blocking(move || sd_desktop_linux::open_files_path_with(&[path], &url))

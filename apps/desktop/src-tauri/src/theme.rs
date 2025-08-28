@@ -12,9 +12,5 @@ pub enum AppThemeType {
 #[specta::specta]
 #[allow(unused_variables)]
 pub async fn lock_app_theme(theme_type: AppThemeType) {
-	#[cfg(target_os = "macos")]
-	unsafe {
-		sd_desktop_macos::lock_app_theme(theme_type as isize);
-	}
 	// println!("Lock theme, type: {theme_type:?}")
 }

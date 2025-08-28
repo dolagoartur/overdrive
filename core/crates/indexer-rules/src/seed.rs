@@ -253,9 +253,8 @@ pub static NO_SYSTEM_FILES: LazyLock<SystemIndexerRule> = LazyLock::new(|| {
 					"[A-Z]:/swapfile.sys",
 					"C:/DumpStack.log.tmp",
 				],
-				// https://github.com/github/gitignore/blob/main/Global/macOS.gitignore
-				// https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/FileSystemOverview/FileSystemOverview.html#//apple_ref/doc/uid/TP40010672-CH2-SW14
-				#[cfg(any(target_os = "ios", target_os = "macos"))]
+				// iOS-specific rules (keeping iOS support for future Android compatibility)
+				#[cfg(target_os = "ios")]
 				vec![
 					"**/.{DS_Store,AppleDouble,LSOverride}",
 					// Icon must end with two \r

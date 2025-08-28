@@ -478,15 +478,8 @@ async fn infer_the_mime_type(
 		"avi" => "video/x-msvideo",
 		// MP4 video
 		"mp4" | "m4v" => "video/mp4",
-		// TODO: Bruh
-		#[cfg(not(target_os = "macos"))]
-		// TODO: Bruh
-		// FIX-ME: This media types break macOS video rendering
 		// MPEG transport stream
 		"ts" => "video/mp2t",
-		// TODO: Bruh
-		#[cfg(not(target_os = "macos"))]
-		// FIX-ME: This media types break macOS video rendering
 		// MPEG Video
 		"mpeg" => "video/mpeg",
 		// OGG video

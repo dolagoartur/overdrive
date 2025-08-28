@@ -108,7 +108,7 @@ git = "https://github.com/spacedriveapp/rust-libp2p"
 rev = "1024411ffa"
 
 [profile.dev]
-# Make compilation faster on macOS
+# Faster compilation settings
 codegen-units   = 256
 debug           = 0
 incremental     = true

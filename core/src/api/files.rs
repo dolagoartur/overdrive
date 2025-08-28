@@ -581,7 +581,7 @@ pub(crate) fn mount() -> AlphaRouter<Ctx> {
 								FileIOError::from((
 									full_path,
 									match e {
-										#[cfg(all(unix, not(target_os = "macos")))]
+										#[cfg(unix)]
 										trash::Error::FileSystem { path: _, source: e } => e,
 										_ => io::Error::other(e),
 									},

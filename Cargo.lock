@@ -10324,8 +10324,6 @@ dependencies = [
  "rspc",
  "sd-core",
  "sd-desktop-linux",
- "sd-desktop-macos",
- "sd-desktop-windows",
  "sd-fda",
  "sd-prisma",
  "serde",
@@ -10361,22 +10359,6 @@ dependencies = [
  "libc",
  "tokio",
  "wgpu",
-]
-
-[[package]]
-name = "sd-desktop-macos"
-version = "0.1.0"
-dependencies = [
- "swift-rs",
-]
-
-[[package]]
-name = "sd-desktop-windows"
-version = "0.1.0"
-dependencies = [
- "libc",
- "normpath",
- "windows 0.58.0",
 ]
 
 [[package]]

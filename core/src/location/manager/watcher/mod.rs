@@ -497,7 +497,7 @@ mod tests {
 	use tracing::{debug, error};
 	// use tracing_test::traced_test;
 
-	#[cfg(any(target_os = "macos", target_os = "ios"))]
+	#[cfg(target_os = "ios")]
 	use notify::event::DataChange;
 
 	#[cfg(target_os = "linux")]
@@ -573,7 +573,7 @@ mod tests {
 		#[cfg(target_os = "windows")]
 		expect_event(events_rx, &file_path, EventKind::Modify(ModifyKind::Any)).await;
 
-		#[cfg(any(target_os = "macos", target_os = "ios"))]
+		#[cfg(target_os = "ios")]
 		expect_event(
 			events_rx,
 			&file_path,
@@ -613,7 +613,7 @@ mod tests {
 		#[cfg(target_os = "windows")]
 		expect_event(events_rx, &dir_path, EventKind::Create(CreateKind::Any)).await;
 
-		#[cfg(any(target_os = "macos", target_os = "ios"))]
+		#[cfg(target_os = "ios")]
 		expect_event(events_rx, &dir_path, EventKind::Create(CreateKind::Folder)).await;
 
 		#[cfg(target_os = "linux")]
@@ -654,7 +654,7 @@ mod tests {
 		#[cfg(target_os = "windows")]
 		expect_event(events_rx, &file_path, EventKind::Modify(ModifyKind::Any)).await;
 
-		#[cfg(any(target_os = "macos", target_os = "ios"))]
+		#[cfg(target_os = "ios")]
 		expect_event(
 			events_rx,
 			&file_path,
@@ -703,7 +703,7 @@ mod tests {
 		)
 		.await;
 
-		#[cfg(any(target_os = "macos", target_os = "ios"))]
+		#[cfg(target_os = "ios")]
 		expect_event(
 			events_rx,
 			&file_path,
@@ -754,7 +754,7 @@ mod tests {
 		)
 		.await;
 
-		#[cfg(any(target_os = "macos", target_os = "ios"))]
+		#[cfg(target_os = "ios")]
 		expect_event(
 			events_rx,
 			&dir_path,

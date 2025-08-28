@@ -294,18 +294,7 @@ async fn main() -> tauri::Result<()> {
 						#[cfg(target_os = "windows")]
 						window.set_decorations(false).unwrap();
 
-						#[cfg(target_os = "macos")]
-						{
-							unsafe {
-								sd_desktop_macos::set_titlebar_style(
-									&window.ns_window().expect("NSWindows must exist on macOS"),
-									false,
-								);
-								sd_desktop_macos::disable_app_nap(
-									&"File indexer needs to run unimpeded".into(),
-								);
-							};
-						}
+
 					});
 
 					Ok(())
@@ -326,11 +315,7 @@ async fn main() -> tauri::Result<()> {
 					.emit("keybind", command)
 					.expect("Unable to emit window event");
 
-				#[cfg(target_os = "macos")]
-				{
-					let nswindow = window.ns_window().unwrap();
-					unsafe { sd_desktop_macos::set_titlebar_style(&nswindow, _state) };
-				}
+
 			}
 			_ => {}
 		})
